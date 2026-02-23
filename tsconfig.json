@@ -37,7 +37,8 @@
       "@types/*": ["./src/types/*"],
       "@config/*": ["./src/config/*"],
       "@lib/*": ["./src/lib/*"],
-      "@assets/*": ["./src/assets/*"]
+      "@assets/*": ["./src/assets/*"],
+      "@features/*": ["./src/features/*"]
     }
   },
   "include": ["src"]
