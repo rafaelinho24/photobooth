@@ -20,19 +20,28 @@ describe('Home', () => {
     expect(() => renderHome()).not.toThrow();
   });
 
-  it('renders the hero heading', () => {
+  it('renders the photobooth heading', () => {
     renderHome();
-    expect(screen.getByText(/the ai-native/i)).toBeInTheDocument();
+    expect(screen.getByText('Photobooth')).toBeInTheDocument();
   });
 
-  it('renders CTA links', () => {
+  it('renders the print button', () => {
     renderHome();
-    const links = screen.getAllByRole('link', { name: /github/i });
-    expect(links.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole('button', { name: /imprimer/i })).toBeInTheDocument();
   });
 
-  it('renders feature cards', () => {
+  it('disables print button when no photo is loaded', () => {
     renderHome();
-    expect(screen.getByText('Zero config')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /imprimer/i })).toBeDisabled();
+  });
+
+  it('renders the waiting state when no photo', () => {
+    renderHome();
+    expect(screen.getByText(/en attente/i)).toBeInTheDocument();
+  });
+
+  it('renders the watching status', () => {
+    renderHome();
+    expect(screen.getByText('Surveillance active')).toBeInTheDocument();
   });
 });

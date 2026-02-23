@@ -1,3 +1,4 @@
+import PhotoboothLayout from '@app/layouts/PhotoboothLayout';
 import RootLayout from '@app/layouts/RootLayout';
 import { Spinner } from '@components/ui/Spinner';
 import { ROUTES } from '@constants/routes';
@@ -29,9 +30,13 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Root layout — wraps ALL pages with Header + Footer */}
-        <Route element={<RootLayout />}>
+        {/* Photobooth layout — full-screen kiosk, no Header/Footer */}
+        <Route element={<PhotoboothLayout />}>
           <Route path={ROUTES.HOME} element={<Home />} />
+        </Route>
+
+        {/* Root layout — wraps remaining pages with Header + Footer */}
+        <Route element={<RootLayout />}>
           <Route path={ROUTES.PLAYGROUND} element={<Playground />} />
           {/* Add routes here: */}
           {/* <Route path={ROUTES.ABOUT} element={<About />} /> */}
