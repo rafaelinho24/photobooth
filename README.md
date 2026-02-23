@@ -31,6 +31,15 @@ There are hundreds of React + Vite + Tailwind starters. Here's what makes this o
 | **Releases** | Automated version bump + changelog + tag | Manual |
 | **Multi-AI** | Claude Code + Cursor + Copilot rules | Single tool or none |
 
+## Prerequisites
+
+Before you start, install these (once):
+
+1. [Node.js 20+](https://nodejs.org) — download and run the installer
+2. pnpm — open a terminal and run: `npm install -g pnpm`
+3. [Claude Code](https://claude.ai/code) — your AI copilot
+4. [VS Code](https://code.visualstudio.com) — open the project, accept recommended extensions when prompted
+
 ## Quick Start
 
 ```bash
