@@ -48,6 +48,7 @@ export default defineConfig(({ mode }) => {
         '@config': resolve(__dirname, './src/config'),
         '@lib': resolve(__dirname, './src/lib'),
         '@assets': resolve(__dirname, './src/assets'),
+        '@features': resolve(__dirname, './src/features'),
       },
     },
 

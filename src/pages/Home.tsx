@@ -1,6 +1,7 @@
 import { SeoHead } from '@components/features/SeoHead';
+import { GabaritPicker, useGabarit } from '@features/gabarit';
 import { cn } from '@utils/cn';
-import { Camera, Printer } from 'lucide-react';
+import { Camera, ImagePlus, Printer } from 'lucide-react';
 
 // WHY: Placeholder state — will be replaced by usePhotoWatcher hook once backend is wired
 const MOCK_STATE = {
@@ -12,6 +13,14 @@ const MOCK_STATE = {
 
 export default function Home() {
   const { hasPhoto, isWatching, lastPhotoTime, photoUrl } = MOCK_STATE;
+  const {
+    selected: gabarit,
+    gabarits,
+    isPickerOpen,
+    openPicker,
+    closePicker,
+    selectGabarit,
+  } = useGabarit();
 
   function handlePrint() {
     // WHY: window.print() triggers browser print dialog — will be replaced by backend print API
@@ -26,6 +35,17 @@ export default function Home() {
         {/* ── Header ─────────────────────────────────────────── */}
         <header className="flex shrink-0 items-center justify-between px-8 py-5">
           <h1 className="text-lg font-medium tracking-tight text-gray-900">Photobooth</h1>
+
+          {/* Gabarit selector button */}
+          <button
+            type="button"
+            onClick={openPicker}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-all duration-150 hover:border-gray-400 hover:text-gray-900 active:scale-[0.98]"
+            aria-label="Changer le gabarit"
+          >
+            <ImagePlus size={15} aria-hidden="true" />
+            {gabarit ? gabarit.name : 'Gabarit'}
+          </button>
         </header>
 
         {/* ── Photo display ──────────────────────────────────── */}
@@ -40,13 +60,15 @@ export default function Home() {
               </div>
             )}
 
-            {/* PNG gabarit overlay — uncomment once gabarit.png is placed in /public */}
-            {/* <img
-              src="/gabarit.png"
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            /> */}
+            {/* PNG gabarit overlay — renders on top of the photo when a gabarit is selected */}
+            {gabarit && (
+              <img
+                src={gabarit.url}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+              />
+            )}
           </div>
         </main>
 
@@ -92,6 +114,15 @@ export default function Home() {
           </span>
         </footer>
       </div>
+
+      {/* Gabarit picker modal */}
+      <GabaritPicker
+        isOpen={isPickerOpen}
+        onClose={closePicker}
+        gabarits={gabarits}
+        selected={gabarit}
+        onSelect={selectGabarit}
+      />
     </>
   );
 }
