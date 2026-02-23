@@ -75,4 +75,18 @@ export default defineConfig([
       globals: globals.node,
     },
   },
+
+  // Server (Express backend) → Node globals, no browser/React rules
+  {
+    files: ['server/**/*.ts'],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+    },
+  },
 ])
