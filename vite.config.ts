@@ -52,6 +52,13 @@ export default defineConfig(({ mode }) => {
       },
     },
 
+    // WHY: Proxy /api to Express backend in dev so the frontend never touches CORS
+    server: {
+      proxy: {
+        '/api': 'http://localhost:3001',
+      },
+    },
+
     build: {
       chunkSizeWarningLimit: 500,
     },
