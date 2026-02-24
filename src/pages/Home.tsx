@@ -1,6 +1,5 @@
 import { SeoHead } from '@components/features/SeoHead';
 import { GabaritPicker, useGabarit } from '@features/gabarit';
-import { LiveViewPanel } from '@features/liveview';
 import { PhotoStrip, usePhotoWatcher, ViewerPanel } from '@features/photos';
 import { cn } from '@utils/cn';
 import { ImagePlus, Printer } from 'lucide-react';
@@ -70,21 +69,10 @@ export default function Home() {
           </button>
         </header>
 
-        {/* ── Main panels (live view + viewer) ───────────────── */}
-        <main className="flex min-h-0 flex-1 gap-4 px-6 pb-2">
-          {/* Left: Live view camera feed */}
-          <div className="flex h-full flex-1 items-center justify-center">
-            {/* WHY: max-w-sm constrains portrait panel width on wide screens */}
-            <div className="h-full w-full max-w-sm">
-              <LiveViewPanel className="h-full w-full" />
-            </div>
-          </div>
-
-          {/* Right: Selected photo with gabarit overlay */}
-          <div className="flex h-full flex-1 items-center justify-center">
-            <div className="h-full w-full max-w-sm">
-              <ViewerPanel photo={selectedPhoto} gabarit={gabarit} className="h-full w-full" />
-            </div>
+        {/* ── Main panel (photo viewer) ───────────────────────── */}
+        <main className="flex min-h-0 flex-1 items-center justify-center px-6 pb-2">
+          <div className="h-full w-full max-w-2xl">
+            <ViewerPanel photo={selectedPhoto} gabarit={gabarit} className="h-full w-full" />
           </div>
         </main>
 
