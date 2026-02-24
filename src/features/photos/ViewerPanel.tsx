@@ -14,7 +14,7 @@ export function ViewerPanel({ photo, gabarit, className }: ViewerPanelProps) {
   return (
     <div
       className={cn(
-        'relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-gray-100',
+        'relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-neutral-800',
         className,
       )}
     >
@@ -37,8 +37,8 @@ export function ViewerPanel({ photo, gabarit, className }: ViewerPanelProps) {
         </>
       ) : (
         <div className="flex flex-col items-center justify-center gap-3">
-          <ImageIcon size={48} strokeWidth={1} className="text-gray-300" aria-hidden="true" />
-          <p className="text-sm text-gray-400">Sélectionnez une photo</p>
+          <ImageIcon size={48} strokeWidth={1} className="text-neutral-600" aria-hidden="true" />
+          <p className="text-sm text-neutral-500">Sélectionnez une photo</p>
         </div>
       )}
     </div>

@@ -4,6 +4,7 @@ import express from 'express';
 import { config } from './config';
 import { photosRouter } from './routes/photos';
 import { printRouter } from './routes/print';
+import { shutterRouter } from './routes/shutter';
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json({ limit: '20mb' }));
 
 app.use('/api/photos', photosRouter);
 app.use('/api/print', printRouter);
+app.use('/api/shutter', shutterRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {

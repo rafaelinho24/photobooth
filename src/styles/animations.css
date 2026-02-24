@@ -54,6 +54,39 @@
   animation: slideInFromRight 0.3s ease-out forwards;
 }
 
+/* ─── Countdown number — spring pop on each digit ──────────── */
+
+@keyframes countdownPop {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─── Photo thumbnail — slow white glow pulse ──────────────── */
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 22px 6px rgba(255, 255, 255, 0.22);
+  }
+}
+
+@utility animate-glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
 /* ─── MorphingLogo blob — organic shape shift ──────────────── */
 
 @keyframes morph {

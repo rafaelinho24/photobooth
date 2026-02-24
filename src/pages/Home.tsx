@@ -1,24 +1,57 @@
 import { SeoHead } from '@components/features/SeoHead';
-import { GabaritPicker, useGabarit } from '@features/gabarit';
-import { PhotoStrip, usePhotoWatcher, ViewerPanel } from '@features/photos';
+import { GabaritPanel, useGabarit } from '@features/gabarit';
+import { CoverFlow, usePhotoWatcher, ViewerPanel } from '@features/photos';
 import { cn } from '@utils/cn';
-import { ImagePlus, Printer } from 'lucide-react';
+import { Camera, Printer } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
+const COUNTDOWN_START = 5;
 
 export default function Home() {
-  const {
-    selected: gabarit,
-    gabarits,
-    isPickerOpen,
-    openPicker,
-    closePicker,
-    selectGabarit,
-  } = useGabarit();
+  const { selected: gabarit, gabarits, selectGabarit } = useGabarit();
   const { photos, selectedPhoto, isWatching, selectPhoto } = usePhotoWatcher();
+  const [isShooting, setIsShooting] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up timer on unmount
+  useEffect(
+    () => () => {
+      if (countdownRef.current) clearTimeout(countdownRef.current);
+    },
+    [],
+  );
+
+  function handleShutter() {
+    if (isShooting || countdown !== null) return;
+    setCountdown(COUNTDOWN_START);
+  }
+
+  useEffect(() => {
+    if (countdown === null) return;
+
+    if (countdown === 0) {
+      // Trigger shutter after the "0" is briefly shown
+      countdownRef.current = setTimeout(() => {
+        void (async () => {
+          setCountdown(null);
+          setIsShooting(true);
+          try {
+            await fetch('/api/shutter', { method: 'POST' });
+          } finally {
+            setIsShooting(false);
+          }
+        })();
+      }, 600);
+      return;
+    }
+
+    countdownRef.current = setTimeout(() => setCountdown(n => (n ?? 1) - 1), 1000);
+  }, [countdown]);
 
   async function handlePrint() {
     if (!selectedPhoto) return;
 
-    // Composite photo + gabarit on a canvas, then send base64 to the print API
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -42,91 +75,120 @@ export default function Home() {
     });
   }
 
-  const lastPhotoTime = selectedPhoto
-    ? new Date(selectedPhoto.takenAt).toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      })
-    : null;
-
   return (
     <>
-      <SeoHead title="Photobooth" description="Application photobooth Canon Selphy" />
+      <SeoHead
+        title="Photobooth Teixeira Jaton"
+        description="Application photobooth Canon Selphy"
+      />
 
-      <div className="flex h-screen w-screen flex-col bg-white">
-        {/* ── Header ─────────────────────────────────────────── */}
-        <header className="flex shrink-0 items-center justify-between px-6 py-4">
-          <h1 className="text-lg font-medium tracking-tight text-gray-900">Photobooth</h1>
-          <button
-            type="button"
-            onClick={openPicker}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-all duration-150 hover:border-gray-400 hover:text-gray-900 active:scale-[0.98]"
-            aria-label="Changer le gabarit"
-          >
-            <ImagePlus size={15} aria-hidden="true" />
-            {gabarit ? gabarit.name : 'Gabarit'}
-          </button>
-        </header>
+      <div className="flex h-screen w-screen flex-col bg-neutral-900">
+        {/* ── Countdown overlay ───────────────────────────────── */}
+        {countdown !== null && (
+          <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <span
+              key={countdown}
+              className="font-bold text-white select-none"
+              style={{
+                fontSize: 'clamp(8rem, 30vw, 20rem)',
+                lineHeight: 1,
+                animation: 'countdownPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
+              }}
+            >
+              {countdown === 0 ? '📸' : countdown}
+            </span>
+          </div>
+        )}
 
-        {/* ── Main panel (photo viewer) ───────────────────────── */}
-        <main className="flex min-h-0 flex-1 items-center justify-center px-6 pb-2">
-          <div className="h-full w-full max-w-2xl">
-            <ViewerPanel photo={selectedPhoto} gabarit={gabarit} className="h-full w-full" />
+        {/* ── 3-column main layout ────────────────────────────── */}
+        <main className="flex min-h-0 flex-1 gap-4 px-6 pt-6 pb-2">
+          {/* ── Col gauche : photos précédentes ─────────────── */}
+          <div className="flex w-40 shrink-0 flex-col gap-3">
+            <h2 className="shrink-0 text-center text-xs font-semibold tracking-widest text-neutral-500 uppercase">
+              Les photos
+            </h2>
+            <div className="min-h-0 flex-1">
+              <CoverFlow photos={photos} selectedPhoto={selectedPhoto} onSelect={selectPhoto} />
+            </div>
+          </div>
+
+          {/* ── Col centre : photo + boutons ─────────────────── */}
+          <div className="flex flex-1 flex-col items-center justify-center gap-5">
+            {/* Photo viewer contrainte en ratio 2:3 portrait */}
+            <div className="flex min-h-0 flex-1 items-center justify-center">
+              <div className="aspect-[2/3] h-full max-h-full">
+                <ViewerPanel photo={selectedPhoto} gabarit={gabarit} className="h-full w-full" />
+              </div>
+            </div>
+
+            {/* Boutons d'action directement sous la photo */}
+            <div className="flex shrink-0 items-center gap-4">
+              <button
+                type="button"
+                onClick={handleShutter}
+                disabled={isShooting || countdown !== null}
+                className={cn(
+                  'inline-flex items-center gap-3 rounded-full px-10 py-4 text-base font-semibold transition-all duration-200 active:scale-[0.97]',
+                  isShooting || countdown !== null
+                    ? 'cursor-not-allowed bg-neutral-800 text-neutral-600'
+                    : 'bg-red-500 text-white hover:bg-red-600',
+                )}
+                aria-label="Déclencher la photo"
+              >
+                <Camera size={20} aria-hidden="true" />
+                {isShooting
+                  ? 'Déclenchement…'
+                  : countdown !== null
+                    ? `Prêt dans ${countdown}…`
+                    : 'Déclencher'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void handlePrint()}
+                disabled={!selectedPhoto}
+                className={cn(
+                  'inline-flex items-center gap-3 rounded-full px-10 py-4 text-base font-semibold transition-all duration-200 active:scale-[0.97]',
+                  selectedPhoto
+                    ? 'bg-white text-neutral-900 hover:bg-neutral-100'
+                    : 'cursor-not-allowed bg-neutral-800 text-neutral-600',
+                )}
+                aria-label="Imprimer la photo"
+              >
+                <Printer size={20} aria-hidden="true" />
+                Imprimer
+              </button>
+            </div>
+          </div>
+
+          {/* ── Col droite : filtres / gabarits ─────────────── */}
+          <div className="w-40 shrink-0">
+            <GabaritPanel gabarits={gabarits} selected={gabarit} onSelect={selectGabarit} />
           </div>
         </main>
 
-        {/* ── Photo strip (last 10) ───────────────────────────── */}
-        <section aria-label="10 dernières photos" className="h-28 shrink-0 px-6 py-2">
-          <PhotoStrip photos={photos} selectedPhoto={selectedPhoto} onSelect={selectPhoto} />
-        </section>
-
-        {/* ── Footer bar ─────────────────────────────────────── */}
+        {/* ── Footer : titre + statut ──────────────────────── */}
         <footer className="flex shrink-0 items-center justify-between px-6 py-4">
+          <h1 className="text-sm font-semibold tracking-tight text-neutral-300">
+            Photobooth Teixeira Jaton
+          </h1>
+
           <div className="flex items-center gap-2.5">
             <span
               className={cn(
-                'h-2 w-2 rounded-full',
+                'h-2.5 w-2.5 rounded-full',
                 isWatching
                   ? 'animate-pulse bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.7)]'
-                  : 'bg-gray-300',
+                  : 'bg-neutral-600',
               )}
               aria-hidden="true"
             />
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-neutral-500">
               {isWatching ? 'Surveillance active' : 'En attente du serveur…'}
             </span>
           </div>
-
-          <button
-            type="button"
-            onClick={() => void handlePrint()}
-            disabled={!selectedPhoto}
-            className={cn(
-              'inline-flex items-center gap-2.5 rounded-full px-8 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.97]',
-              selectedPhoto
-                ? 'bg-gray-900 text-white hover:bg-gray-700'
-                : 'cursor-not-allowed bg-gray-100 text-gray-400',
-            )}
-            aria-label="Imprimer la photo"
-          >
-            <Printer size={16} aria-hidden="true" />
-            Imprimer
-          </button>
-
-          <span className="w-32 text-right font-mono text-sm text-gray-400">
-            {lastPhotoTime ?? '—'}
-          </span>
         </footer>
       </div>
-
-      <GabaritPicker
-        isOpen={isPickerOpen}
-        onClose={closePicker}
-        gabarits={gabarits}
-        selected={gabarit}
-        onSelect={selectGabarit}
-      />
     </>
   );
 }
